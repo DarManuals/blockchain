@@ -2,13 +2,15 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/borudar/blockchain/models"
-	"github.com/borudar/blockchain/service"
-	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"sync"
+
+	"github.com/gorilla/mux"
+
+	"github.com/darmanuals/blockchain/models"
+	"github.com/darmanuals/blockchain/service"
 )
 
 var (
