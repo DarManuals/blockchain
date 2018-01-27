@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"sync"
 	"github.com/borudar/blockchain/db"
+	"log"
 )
 
 var (
@@ -55,6 +56,7 @@ func GetStatus(w http.ResponseWriter, r *http.Request) {
 
 	stat := models.Status{
 		Id: "88",
+		Name: "Bogdan",
 		URL: "192.168.44.88:3000",
 		LastHash: service.LastBlockHash,
 	}
@@ -65,7 +67,6 @@ func GetStatus(w http.ResponseWriter, r *http.Request) {
 	}
 	stat.Neighbours = neighbours
 	json.NewEncoder(w).Encode(stat)
-	//:string,name:string,last_hash:sha256, neighbours:[‘id1’, ‘id2’,’id3’], url:’http://192.168.1.111:3000’’}
 }
 
 func AddLink(w http.ResponseWriter, r *http.Request) {
@@ -87,5 +88,27 @@ func AddLink(w http.ResponseWriter, r *http.Request) {
 func Sync(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	var blocks []models.Block
+	var tmpBlocks []models.Block
 
+	for _, url := range db.Hosts {
+		b, _ := http.Get("http://"+url+"/blockchain/get_blocks/10000")
+		body, err := ioutil.ReadAll(b.Body)
+		if err != nil {
+			return
+		}
+		b.Body.Close()
+
+		err = json.Unmarshal(body,&tmpBlocks)
+		if err != nil {
+			log.Println("Unmarshal: ", err)
+		}
+		if len(blocks) < len(tmpBlocks) {
+			blocks = tmpBlocks
+		}
+	}
+
+	for _, val := range blocks {
+		db.Blocks[val.BlockHash] = val
+	}
 }

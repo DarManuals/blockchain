@@ -58,7 +58,6 @@ func GetBlocks(count int) []models.Block {
 
 	for i := 0; i < count; i++ {
 		block, ok := db.Blocks[key]
-		log.Println(key, db.Blocks)
 
 		if !ok {
 			break

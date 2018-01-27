@@ -6,10 +6,10 @@ import "time"
 
 type (
 	Block struct {
-		PreviousBlockHash string
-		Rows              []Tx
-		Timestamp         time.Time
-		BlockHash         string
+		PreviousBlockHash string    `json:"prev_hash"`
+		Rows              []Tx      `json:"tx"`
+		Timestamp         time.Time `json:"ts"`
+		BlockHash         string    `json:"hash"`
 	}
 
 	Data struct {
@@ -23,15 +23,13 @@ type (
 	}
 
 	Host struct {
-		Id string
+		Id  string
 		URL string
 	}
 
 	Status struct {
 		Id, Name, LastHash string
-		Neighbours []string
-		URL string
+		Neighbours         []string
+		URL                string
 	}
-
 )
-
