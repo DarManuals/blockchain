@@ -1,17 +1,17 @@
 package db
 
 import (
-	"github.com/gocql/gocql"
-	"github.com/borudar/blockchain/models"
 	"encoding/json"
+	"github.com/borudar/blockchain/models"
+	"github.com/gocql/gocql"
 )
 
 var Session *gocql.Session
-var Blocks       = make(map[string]models.Block)
-var Balances       = make(map[string]int)
-var Hosts	= make(map[string]string)
+var Blocks = make(map[string]models.Block)
+var Balances = make(map[string]int)
+var Hosts = make(map[string]string)
 
-func Load()  {
+func Load() {
 	var err error
 	cluster := gocql.NewCluster("127.0.0.1")
 	cluster.Keyspace = "blockchain"

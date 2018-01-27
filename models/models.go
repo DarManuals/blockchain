@@ -28,8 +28,10 @@ type (
 	}
 
 	Status struct {
-		Id, Name, LastHash string
-		Neighbours         []string
-		URL                string
+		Id         int      `json:"id"`
+		Name       string   `json:"name"`
+		LastHash   string   `json:"last_hash"`
+		Neighbours []string `json:"neighbours"`
+		URL        string   `json:"url"`
 	}
 )

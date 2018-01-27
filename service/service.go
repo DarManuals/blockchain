@@ -2,14 +2,13 @@ package service
 
 import (
 	"crypto/sha256"
-	//"encoding/base64"
+	"encoding/hex"
+	"encoding/json"
+	"github.com/borudar/blockchain/db"
 	"github.com/borudar/blockchain/models"
+	"log"
 	"strconv"
 	"time"
-	"github.com/borudar/blockchain/db"
-	"log"
-	"encoding/json"
-	"encoding/hex"
 )
 
 var (

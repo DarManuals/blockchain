@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/borudar/blockchain/controllers"
+	"github.com/borudar/blockchain/db"
 	"github.com/gorilla/mux"
 	"net/http"
-	"github.com/borudar/blockchain/db"
 )
 
 func main() {

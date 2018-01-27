@@ -55,7 +55,7 @@ func GetStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	stat := models.Status{
-		Id: "88",
+		Id: 88,
 		Name: "Bogdan",
 		URL: "192.168.44.88:3000",
 		LastHash: service.LastBlockHash,
@@ -67,6 +67,8 @@ func GetStatus(w http.ResponseWriter, r *http.Request) {
 	}
 	stat.Neighbours = neighbours
 	json.NewEncoder(w).Encode(stat)
+	log.Println("got request")
+	log.Println("send: ", stat)
 }
 
 func AddLink(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +110,9 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	db.Blocks = make(map[string]models.Block)
 	for _, val := range blocks {
 		db.Blocks[val.BlockHash] = val
 	}
+	log.Println("Sync: Blocks: ", db.Blocks)
 }
