@@ -12,12 +12,12 @@ import (
 )
 
 var (
-	tmpData []string
+	tmpData []models.Tx
 	mu      = &sync.Mutex{}
 )
 
 func AddData(w http.ResponseWriter, r *http.Request) {
-	var data models.Data
+	var data models.Tx
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return
@@ -25,12 +25,12 @@ func AddData(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	json.Unmarshal(body, &data)
 
-	if data.SomeData != "" {
+	if data.To != "" {
 		mu.Lock()
-		tmpData = append(tmpData, data.SomeData)
+		tmpData = append(tmpData, data)
 		if len(tmpData) > 4 {
 			service.AddBlock(tmpData)
-			tmpData = make([]string, 0)
+			tmpData = make([]models.Tx, 0)
 		}
 		mu.Unlock()
 	}
@@ -47,4 +47,9 @@ func GetBlocks(w http.ResponseWriter, r *http.Request) {
 	blocks := service.GetBlocks(int(n))
 	mu.Unlock()
 	json.NewEncoder(w).Encode(blocks)
+}
+
+func AddTransaction(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 }

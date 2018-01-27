@@ -6,14 +6,16 @@ import (
 	"github.com/borudar/blockchain/models"
 	"strconv"
 	"time"
+	"github.com/borudar/blockchain/db"
+	"log"
+	"encoding/json"
 )
 
 var (
-	blocks        = make(map[string]models.Block)
 	lastBlockHash = "0"
 )
 
-func AddBlock(data []string) {
+func AddBlock(data []models.Tx) {
 	hasher := sha256.New()
 	block := models.Block{
 		PreviousBlockHash: lastBlockHash,
@@ -23,14 +25,23 @@ func AddBlock(data []string) {
 	hasher.Write(BlockBytes(block))
 	block.BlockHash = base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 
-	blocks[block.BlockHash] = block
+	db.Blocks[block.BlockHash] = block
 	lastBlockHash = block.BlockHash
+
+	val, _ := json.Marshal(block)
+
+	if err := db.Session.Query(`INSERT INTO blocks (key, val) VALUES (?, ?)`,
+		block.BlockHash, string(val)).Exec(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func BlockBytes(block models.Block) (b []byte) {
 	b = append([]byte(block.PreviousBlockHash))
 	for _, row := range block.Rows {
-		b = append(b, []byte(row)...)
+		b = append(b, []byte(row.From)...)
+		b = append(b, []byte(row.To)...)
+		//b = append(b, []byte(row.Amount)...)
 	}
 	b = append(b, []byte(strconv.Itoa(block.Timestamp.Second()))...)
 	return
@@ -40,12 +51,13 @@ func GetBlocks(count int) []models.Block {
 	result := make([]models.Block, 0)
 	key := lastBlockHash
 
-	if count > len(blocks) {
-		count = len(blocks)
+	if count > len(db.Blocks) {
+		count = len(db.Blocks)
 	}
-
 	for i := 0; i < count; i++ {
-		block, ok := blocks[key]
+		block, ok := db.Blocks[key]
+		log.Println(key, db.Blocks)
+
 		if !ok {
 			break
 		}
