@@ -8,7 +8,8 @@ import (
 
 var Session *gocql.Session
 var Blocks       = make(map[string]models.Block)
-
+var Balances       = make(map[string]int)
+var Hosts	= make(map[string]string)
 
 func Load()  {
 	var err error

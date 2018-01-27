@@ -2,31 +2,32 @@ package service
 
 import (
 	"crypto/sha256"
-	"encoding/base64"
+	//"encoding/base64"
 	"github.com/borudar/blockchain/models"
 	"strconv"
 	"time"
 	"github.com/borudar/blockchain/db"
 	"log"
 	"encoding/json"
+	"encoding/hex"
 )
 
 var (
-	lastBlockHash = "0"
+	LastBlockHash = "0"
 )
 
 func AddBlock(data []models.Tx) {
 	hasher := sha256.New()
 	block := models.Block{
-		PreviousBlockHash: lastBlockHash,
+		PreviousBlockHash: LastBlockHash,
 		Rows:              append(data),
 		Timestamp:         time.Now(),
 	}
 	hasher.Write(BlockBytes(block))
-	block.BlockHash = base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+	block.BlockHash = hex.EncodeToString(hasher.Sum(nil))
 
 	db.Blocks[block.BlockHash] = block
-	lastBlockHash = block.BlockHash
+	LastBlockHash = block.BlockHash
 
 	val, _ := json.Marshal(block)
 
@@ -41,7 +42,7 @@ func BlockBytes(block models.Block) (b []byte) {
 	for _, row := range block.Rows {
 		b = append(b, []byte(row.From)...)
 		b = append(b, []byte(row.To)...)
-		//b = append(b, []byte(row.Amount)...)
+		b = append(b, []byte(strconv.Itoa(row.Amount))...)
 	}
 	b = append(b, []byte(strconv.Itoa(block.Timestamp.Second()))...)
 	return
@@ -49,11 +50,12 @@ func BlockBytes(block models.Block) (b []byte) {
 
 func GetBlocks(count int) []models.Block {
 	result := make([]models.Block, 0)
-	key := lastBlockHash
+	key := LastBlockHash
 
-	if count > len(db.Blocks) {
+	if count > len(db.Blocks) || count == -1 {
 		count = len(db.Blocks)
 	}
+
 	for i := 0; i < count; i++ {
 		block, ok := db.Blocks[key]
 		log.Println(key, db.Blocks)

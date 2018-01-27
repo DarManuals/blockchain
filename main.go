@@ -11,9 +11,11 @@ func main() {
 	db.Load()
 
 	router := mux.NewRouter()
-	router.HandleFunc("/add_data", controllers.AddData).Methods("POST")
-	router.HandleFunc("/last_blocks/{count}", controllers.GetBlocks).Methods("GET")
+	router.HandleFunc("/blockchain/get_blocks/{count}", controllers.GetBlocks).Methods("GET")
 	router.HandleFunc("/management/add_transaction", controllers.AddTransaction).Methods("POST")
+	router.HandleFunc("/management/add_link", controllers.AddLink).Methods("POST")
+	router.HandleFunc("/management/status", controllers.GetStatus).Methods("GET")
+	router.HandleFunc("/management/sync", controllers.Sync).Methods("GET")
 
 	http.ListenAndServe(":3000", router)
 }

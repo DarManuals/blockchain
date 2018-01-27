@@ -2,9 +2,7 @@ package models
 
 import "time"
 
-//192.168.44.88
-
-const ID string = "88"
+//const ID string = "88"
 
 type (
 	Block struct {
@@ -23,4 +21,17 @@ type (
 		To     string
 		Amount int
 	}
+
+	Host struct {
+		Id string
+		URL string
+	}
+
+	Status struct {
+		Id, Name, LastHash string
+		Neighbours []string
+		URL string
+	}
+
 )
+

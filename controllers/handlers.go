@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
+	"github.com/borudar/blockchain/db"
 )
 
 var (
@@ -16,7 +17,7 @@ var (
 	mu      = &sync.Mutex{}
 )
 
-func AddData(w http.ResponseWriter, r *http.Request) {
+func AddTransaction(w http.ResponseWriter, r *http.Request) {
 	var data models.Tx
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -49,7 +50,42 @@ func GetBlocks(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(blocks)
 }
 
-func AddTransaction(w http.ResponseWriter, r *http.Request) {
+func GetStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
+	stat := models.Status{
+		Id: "88",
+		URL: "192.168.44.88:3000",
+		LastHash: service.LastBlockHash,
+	}
+
+	neighbours := []string{}
+	for host, _ := range db.Hosts {
+		neighbours = append(neighbours, host)
+	}
+	stat.Neighbours = neighbours
+	json.NewEncoder(w).Encode(stat)
+	//:string,name:string,last_hash:sha256, neighbours:[‘id1’, ‘id2’,’id3’], url:’http://192.168.1.111:3000’’}
+}
+
+func AddLink(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var host models.Host
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return
+	}
+	defer r.Body.Close()
+	json.Unmarshal(body, &host)
+
+	if len(host.Id) > 1 && len(host.URL) > 1 {
+		db.Hosts[host.Id] = host.URL
+	}
+	json.NewEncoder(w).Encode(host)
+}
+
+func Sync(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 
 }
