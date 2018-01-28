@@ -1,18 +1,18 @@
 package db
 
 import (
+	"encoding/json"
 	"github.com/darmanuals/blockchain/models"
 	"github.com/go-redis/redis"
 	"log"
-	"encoding/json"
 )
 
 var (
-	Blocks   = make(map[string]models.Block)
-	Balances = make(map[string]int)
-	Hosts    = make(map[string]string)
+	Blocks        = make(map[string]models.Block)
+	Balances      = make(map[string]int)
+	Hosts         = make(map[string]string)
 	LastBlockHash = "0"
-	Redis 	*redis.Client
+	Redis         *redis.Client
 )
 
 func Load() {
@@ -28,12 +28,17 @@ func Load() {
 	}
 
 	lastHash := Redis.Get("last_hash")
-	if len(lastHash.Val()) < 1 {
+	if lastHash.Val() == "" {
 		LastBlockHash = "0"
-		err := Redis.Set("last_hash", "0", 0).Err()
-		if err != nil {log.Fatal(err)}
+		err := SaveLastHash("0")
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("Got last block hash: ", LastBlockHash)
+	} else {
+		LastBlockHash = lastHash.Val()
+		log.Println("Got last block hash: ", LastBlockHash)
 	}
-	LastBlockHash = lastHash.Val()
 }
 
 func SaveBlock(block models.Block) error {
