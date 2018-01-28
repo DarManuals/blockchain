@@ -23,7 +23,8 @@ func AddBlock(data []models.Tx) {
 	hasher.Write(BlockBytes(block))
 	block.BlockHash = hex.EncodeToString(hasher.Sum(nil))
 
-	db.Blocks[block.BlockHash] = block
+	db.SaveBlock(block)
+	db.SaveLastHash(block.BlockHash)
 	db.LastBlockHash = block.BlockHash
 
 	for _, url := range db.Hosts {
@@ -53,17 +54,16 @@ func GetBlocks(count int) []models.Block {
 	result := make([]models.Block, 0)
 	key := db.LastBlockHash
 
-	if count > len(db.Blocks) || count == -1 {
-		count = len(db.Blocks)
-	}
-
 	for i := 0; i < count; i++ {
-		block, ok := db.Blocks[key]
-
-		if !ok {
+		block, err := db.GetBlock(key)
+		if err != nil {
+			log.Println("get blocks err: ", err)
 			break
 		}
+
 		key = block.PreviousBlockHash
+		if key == "0" {break}
+
 		result = append(result, block)
 	}
 	return result
