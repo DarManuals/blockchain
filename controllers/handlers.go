@@ -2,15 +2,15 @@ package controllers
 
 import (
 	"encoding/json"
+	"github.com/borudar/blockchain/db"
 	"github.com/borudar/blockchain/models"
 	"github.com/borudar/blockchain/service"
 	"github.com/gorilla/mux"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"sync"
-	"github.com/borudar/blockchain/db"
-	"log"
 )
 
 var (
@@ -45,9 +45,7 @@ func GetBlocks(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	mu.Lock()
 	blocks := service.GetBlocks(int(n))
-	mu.Unlock()
 	json.NewEncoder(w).Encode(blocks)
 }
 
@@ -55,9 +53,9 @@ func GetStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	stat := models.Status{
-		Id: 88,
-		Name: "Bogdan",
-		URL: "192.168.44.88:3000",
+		Id:       88,
+		Name:     "Bogdan",
+		URL:      "192.168.44.88:3000",
 		LastHash: service.LastBlockHash,
 	}
 
@@ -92,27 +90,72 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 
 	var blocks []models.Block
 	var tmpBlocks []models.Block
+	var lastUrl string
 
 	for _, url := range db.Hosts {
-		b, _ := http.Get("http://"+url+"/blockchain/get_blocks/10000")
+		b, _ := http.Get("http://" + url + "/blockchain/get_blocks/100")
 		body, err := ioutil.ReadAll(b.Body)
 		if err != nil {
-			return
+			continue
 		}
 		b.Body.Close()
 
-		err = json.Unmarshal(body,&tmpBlocks)
+		err = json.Unmarshal(body, &tmpBlocks)
 		if err != nil {
 			log.Println("Unmarshal: ", err)
 		}
 		if len(blocks) < len(tmpBlocks) {
 			blocks = tmpBlocks
+			lastUrl = url
 		}
+	}
+
+	if len(blocks) < 1 {
+		log.Println("nothing to do")
+		return
 	}
 
 	db.Blocks = make(map[string]models.Block)
 	for _, val := range blocks {
 		db.Blocks[val.BlockHash] = val
 	}
+
+	b, _ := http.Get("http://" + lastUrl + "/management/status")
+	bodyBytes, err := ioutil.ReadAll(b.Body)
+	if err != nil {
+		return
+	}
+	b.Body.Close()
+	var status models.Status
+	json.Unmarshal(bodyBytes, &status)
+	if len(status.LastHash) > 1 {
+		log.Println(status.LastHash)
+		service.LastBlockHash = status.LastHash
+	}
+
 	log.Println("Sync: Blocks: ", db.Blocks)
+	json.NewEncoder(w).Encode(db.Blocks)
+}
+
+func Update(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var up models.Updates
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return
+	}
+	defer r.Body.Close()
+
+	json.Unmarshal(body, &up)
+	log.Println(string(body))
+	log.Println("struct: ", up)
+
+	resp := models.UpdateResp{
+		Success: true,
+		ErrCode: "0x0000",
+		Message: "Ok",
+	}
+
+	json.NewEncoder(w).Encode(resp)
 }

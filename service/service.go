@@ -1,12 +1,14 @@
 package service
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"github.com/borudar/blockchain/db"
 	"github.com/borudar/blockchain/models"
 	"log"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -28,11 +30,15 @@ func AddBlock(data []models.Tx) {
 	db.Blocks[block.BlockHash] = block
 	LastBlockHash = block.BlockHash
 
-	val, _ := json.Marshal(block)
-
-	if err := db.Session.Query(`INSERT INTO blocks (key, val) VALUES (?, ?)`,
-		block.BlockHash, string(val)).Exec(); err != nil {
-		log.Fatal(err)
+	for _, url := range db.Hosts {
+		up := models.Updates{
+			Sender: 88,
+			Block:  block,
+		}
+		b, _ := json.Marshal(up)
+		r := bytes.NewReader(b)
+		http.Post("http://"+url+"/blockchain/receive_update", "application/json", r)
+		log.Println("send: ", up)
 	}
 }
 
