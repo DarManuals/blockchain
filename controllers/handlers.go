@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/borudar/blockchain/db"
-	"github.com/borudar/blockchain/models"
-	"github.com/borudar/blockchain/service"
+	"github.com/darmanuals/blockchain/db"
+	"github.com/darmanuals/blockchain/models"
+	"github.com/darmanuals/blockchain/service"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
