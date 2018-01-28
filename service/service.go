@@ -13,22 +13,18 @@ import (
 	"time"
 )
 
-var (
-	LastBlockHash = "0"
-)
-
 func AddBlock(data []models.Tx) {
 	hasher := sha256.New()
 	block := models.Block{
-		PreviousBlockHash: LastBlockHash,
-		Tx:              append(data),
-		Timestamp:         time.Now(),
+		PreviousBlockHash: db.LastBlockHash,
+		Tx:                append(data),
+		Timestamp:         int(time.Now().UTC().Unix()),
 	}
 	hasher.Write(BlockBytes(block))
 	block.BlockHash = hex.EncodeToString(hasher.Sum(nil))
 
 	db.Blocks[block.BlockHash] = block
-	LastBlockHash = block.BlockHash
+	db.LastBlockHash = block.BlockHash
 
 	for _, url := range db.Hosts {
 		up := models.Updates{
@@ -49,13 +45,13 @@ func BlockBytes(block models.Block) (b []byte) {
 		b = append(b, []byte(row.To)...)
 		b = append(b, []byte(strconv.Itoa(row.Amount))...)
 	}
-	b = append(b, []byte(strconv.Itoa(block.Timestamp.Second()))...)
+	b = append(b, []byte(strconv.Itoa(block.Timestamp))...)
 	return
 }
 
 func GetBlocks(count int) []models.Block {
 	result := make([]models.Block, 0)
-	key := LastBlockHash
+	key := db.LastBlockHash
 
 	if count > len(db.Blocks) || count == -1 {
 		count = len(db.Blocks)

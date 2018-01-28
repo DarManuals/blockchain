@@ -4,9 +4,12 @@ import (
 	"net/http"
 	"github.com/gorilla/mux"
 	"github.com/darmanuals/blockchain/controllers"
+	"github.com/darmanuals/blockchain/db"
 )
 
 func main() {
+	db.Load()
+
 	router := mux.NewRouter()
 	router.HandleFunc("/blockchain/get_blocks/{count}", controllers.GetBlocks).Methods("GET")
 	router.HandleFunc("/blockchain/receive_update", controllers.Update).Methods("POST")

@@ -56,7 +56,7 @@ func GetStatus(w http.ResponseWriter, r *http.Request) {
 		Id:       88,
 		Name:     "Bogdan",
 		URL:      "192.168.44.88:3000",
-		LastHash: service.LastBlockHash,
+		LastHash: db.LastBlockHash,
 	}
 
 	neighbours := []string{}
@@ -130,7 +130,7 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(bodyBytes, &status)
 	if len(status.LastHash) > 1 {
 		log.Println(status.LastHash)
-		service.LastBlockHash = status.LastHash
+		db.LastBlockHash = status.LastHash
 	}
 
 	log.Println("Sync: Blocks: ", db.Blocks)

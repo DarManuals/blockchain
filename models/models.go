@@ -1,13 +1,11 @@
 package models
 
-import "time"
-
 type (
 	Block struct {
-		PreviousBlockHash string    `json:"prev_hash"`
-		Tx              []Tx      `json:"tx"`
-		Timestamp         time.Time `json:"ts"`
-		BlockHash         string    `json:"hash"`
+		PreviousBlockHash string `json:"prev_hash"`
+		Tx                []Tx   `json:"tx"`
+		Timestamp         int    `json:"ts"`
+		BlockHash         string `json:"hash"`
 	}
 
 	Tx struct {
