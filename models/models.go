@@ -5,7 +5,7 @@ import "time"
 type (
 	Block struct {
 		PreviousBlockHash string    `json:"prev_hash"`
-		Rows              []Tx      `json:"tx"`
+		Tx              []Tx      `json:"tx"`
 		Timestamp         time.Time `json:"ts"`
 		BlockHash         string    `json:"hash"`
 	}

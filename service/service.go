@@ -21,7 +21,7 @@ func AddBlock(data []models.Tx) {
 	hasher := sha256.New()
 	block := models.Block{
 		PreviousBlockHash: LastBlockHash,
-		Rows:              append(data),
+		Tx:              append(data),
 		Timestamp:         time.Now(),
 	}
 	hasher.Write(BlockBytes(block))
@@ -44,7 +44,7 @@ func AddBlock(data []models.Tx) {
 
 func BlockBytes(block models.Block) (b []byte) {
 	b = append([]byte(block.PreviousBlockHash))
-	for _, row := range block.Rows {
+	for _, row := range block.Tx {
 		b = append(b, []byte(row.From)...)
 		b = append(b, []byte(row.To)...)
 		b = append(b, []byte(strconv.Itoa(row.Amount))...)
