@@ -2,9 +2,7 @@ package main
 
 import (
 	"net/http"
-
 	"github.com/gorilla/mux"
-
 	"github.com/darmanuals/blockchain/controllers"
 )
 
