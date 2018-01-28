@@ -12,22 +12,22 @@ var (
 	Balances      = make(map[string]int)
 	Hosts         = make(map[string]string)
 	LastBlockHash = "0"
-	Redis         *redis.Client
+	redisCli         *redis.Client
 )
 
 func Load() {
-	Redis = redis.NewClient(&redis.Options{
+	redisCli = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Password: "",
+		DB:       0,
 	})
 
-	st := Redis.Ping()
+	st := redisCli.Ping()
 	if st.String() != "ping: PONG" {
 		log.Fatal(st.String())
 	}
 
-	lastHash := Redis.Get("last_hash")
+	lastHash := redisCli.Get("last_hash")
 	if lastHash.Val() == "" {
 		LastBlockHash = "0"
 		err := SaveLastHash("0")
@@ -46,11 +46,11 @@ func SaveBlock(block models.Block) error {
 	if err != nil {
 		return err
 	}
-	return Redis.Set(block.BlockHash, b, 0).Err()
+	return redisCli.Set(block.BlockHash, b, 0).Err()
 }
 
 func GetBlock(hash string) (models.Block, error) {
-	res := Redis.Get(hash)
+	res := redisCli.Get(hash)
 	if res.Err() != nil {
 		return models.Block{}, res.Err()
 	}
@@ -70,5 +70,5 @@ func GetBlock(hash string) (models.Block, error) {
 }
 
 func SaveLastHash(hash string) error {
-	return Redis.Set("last_hash", hash, 0).Err()
+	return redisCli.Set("last_hash", hash, 0).Err()
 }
